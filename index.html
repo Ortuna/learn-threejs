@@ -1,9 +1,18 @@
 <html>
   <body>
+    <img src="particle.png">
     <div id="container"></div>
     <script type="text/javascript" src="three.min.js"></script>
     <script type="text/javascript" src="jquery-1.11.0.min.js"></script>
     <script type="text/javascript">
+    window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame    ||
+        function( callback ){
+        window.setTimeout(callback, 1000 / 60);
+        };
+        })();
       $(document).ready(function(){
           var WIDTH  = 400,
               HEIGHT = 300;
@@ -21,36 +30,63 @@
           var scene     = new THREE.Scene();
 
           scene.add(camera);
-          camera.position.z = 100;
+          camera.position.z = 300;
           renderer.setSize(WIDTH, HEIGHT);
+          renderer.setClearColor(new THREE.Color(0, 1));
           $container.append(renderer.domElement);
 
 
-          var radius = 50,
-              segments = 16,
-              rings = 16;
-
-          var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xCC0000});
-          var sphere = 
-            new THREE.Mesh(
-              new THREE.SphereGeometry(
-                radius,
-                segments,
-                rings),
-            sphereMaterial);
-          scene.add(sphere);
-
           var pointLight = new THREE.PointLight(0xFFFFFF);
-          pointLight.position.x = 10;
-          pointLight.position.y = 50;
-          pointLight.position.z = 130;
+            pointLight.position.x = 10;
+            pointLight.position.y = 50;
+            pointLight.position.z = 130;
           
-          scene.add(pointLight);
+         // scene.add(pointLight);
+
+          var particleCount = 1800,
+              particles = new THREE.Geometry(),
+              pMaterial = new THREE.ParticleBasicMaterial({
+                color: 0xFFFFFF, 
+                size: 20,
+                map: THREE.ImageUtils.loadTexture("particle.png"),
+                blending: THREE.AdditiveBlending,
+                transparent: true
+              });
+
+          for (var p = 0; p < particleCount; p++) {
+            var pX = Math.random() * 500 -250,
+                pY = Math.random() * 500 -250,
+                pZ = Math.random() * 500 -250,
+            particle = new THREE.Vector3(pX, pY, pZ);
+            particle.velocity = new THREE.Vector3(0, -Math.random(), 0);
+
+            particles.vertices.push(particle);
+          }
+
+          var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
+          particleSystem.sortParticles = true;
+
+          scene.add(particleSystem);
 
 
+          var frame = 0;
+          function update() {
+            frame += 0.1; 
+            particleSystem.rotation.y += 0.01;
+            var pCount = particleCount;
+            while(pCount--) {
+              var particle = particles.vertices[pCount];
+              if(particle.y < -200) {
+                particle.y = 200; 
+                particle.velocity.y = 0; 
+              }
+              particle.velocity.y -= Math.random() * 5.5;
+            }
 
-
-          renderer.render(scene, camera);
+            renderer.render(scene, camera);
+            requestAnimFrame(update);
+          }
+          requestAnimFrame(update);
       });
     </script>
   </body>
