@@ -21,7 +21,7 @@
           var scene     = new THREE.Scene();
 
           scene.add(camera);
-          camera.position.z = 300;
+          camera.position.z = 100;
           renderer.setSize(WIDTH, HEIGHT);
           $container.append(renderer.domElement);
 
@@ -46,6 +46,9 @@
           pointLight.position.z = 130;
           
           scene.add(pointLight);
+
+
+
 
           renderer.render(scene, camera);
       });
